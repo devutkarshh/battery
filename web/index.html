@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Battery RUL Dashboard - Remaining Useful Life Prediction</title>
+  <meta name="description" content="Interactive dashboard predicting lithium-ion battery Remaining Useful Life (RUL) with a physics-informed Random Forest. Runs entirely in your browser, deployable for free." />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="stylesheet" href="css/app.css" />
+</head>
+<body>
+  <nav class="navbar" id="navbar">
+    <div class="brand"><span class="logo">&#9889;</span><span>Battery&nbsp;RUL</span></div>
+    <button class="nav-toggle" id="nav-toggle" aria-label="Menu">&#9776;</button>
+    <div class="nav-links" id="nav-links">
+      <a href="#home">Home</a>
+      <a href="#predictor">Predictor</a>
+      <a href="#explorer">Data</a>
+      <a href="#model">Model</a>
+      <a href="#thermal">Thermal</a>
+      <a href="#deploy" class="nav-cta">Deploy</a>
+    </div>
+  </nav>
+  <header class="hero" id="home">
+    <canvas id="hero-canvas"></canvas>
+    <div class="hero-inner">
+      <span class="hero-badge"><span class="dot"></span> Hybrid Physics-Informed ML</span>
+      <h1>Predict Battery <span class="grad">Remaining Useful Life</span> in your browser</h1>
+      <p class="lead">A Random Forest trained on NASA 18650-cell data (B5, B6, B7) predicts Remaining Useful Life purely in JavaScript - no server, no install, deployable anywhere for free.</p>
+      <div class="hero-ctas">
+        <a href="#predictor" class="btn btn-primary">Try the Predictor</a>
+        <a href="#explorer" class="btn btn-ghost">Explore the Data</a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat"><div class="stat-num" data-stat="r2">0</div><div class="stat-label">Avg R-squared</div></div>
+        <div class="stat"><div class="stat-num" data-stat="mae">0</div><div class="stat-label">Avg MAE (cycles)</div></div>
+        <div class="stat"><div class="stat-num" data-stat="rmse">0</div><div class="stat-label">Avg RMSE (cycles)</div></div>
+        <div class="stat"><div class="stat-num" data-stat="batteries">0</div><div class="stat-label">Batteries modelled</div></div>
+      </div>
+    </div>
+    <div class="scroll-hint">SCROLL</div>
+  </header>
+  <section id="overview">
+    <div class="container">
+      <div class="sec-head reveal">
+        <div class="eyebrow">Battery Health Overview</div>
+        <h2>Three cells, three degradation stories</h2>
+        <p>Explore how the 18650 cells B5, B6 and B7 fade over their charge-discharge life.</p>
+      </div>
+      <div class="bat-cards" id="battery-cards">
+        <div class="bat-card reveal" id="card-B5">
+          <h3><span class="dot" style="background:#38bdf8"></span>Battery B5</h3>
+          <div class="bat-grid">
+            <div><div class="k">Total Cycles</div><div class="v" id="B5-cycles">-</div></div>
+            <div><div class="k">Capacity Fade</div><div class="v" id="B5-fade" style="color:#38bdf8">-</div></div>
+            <div><div class="k">Avg SOH</div><div class="v" id="B5-soh">-</div></div>
+            <div><div class="k">Final SOH</div><div class="v" id="B5-final">-</div></div>
+          </div>
+        </div>
+        <div class="bat-card reveal" id="card-B6">
+          <h3><span class="dot" style="background:#34d399"></span>Battery B6 <span class="best-tag">BEST</span></h3>
+          <div class="bat-grid">
+            <div><div class="k">Total Cycles</div><div class="v" id="B6-cycles">-</div></div>
+            <div><div class="k">Capacity Fade</div><div class="v" id="B6-fade" style="color:#34d399">-</div></div>
+            <div><div class="k">Avg SOH</div><div class="v" id="B6-soh">-</div></div>
+            <div><div class="k">Final SOH</div><div class="v" id="B6-final">-</div></div>
+          </div>
+        </div>
+        <div class="bat-card reveal" id="card-B7">
+          <h3><span class="dot" style="background:#fb923c"></span>Battery B7</h3>
+          <div class="bat-grid">
+            <div><div class="k">Total Cycles</div><div class="v" id="B7-cycles">-</div></div>
+            <div><div class="k">Capacity Fade</div><div class="v" id="B7-fade" style="color:#fb923c">-</div></div>
+            <div><div class="k">Avg SOH</div><div class="v" id="B7-soh">-</div></div>
+            <div><div class="k">Final SOH</div><div class="v" id="B7-final">-</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section id="predictor">
+    <div class="container">
+      <div class="sec-head reveal">
+        <div class="eyebrow">Live RUL Prediction</div>
+        <h2>Estimate remaining life in seconds</h2>
+        <p>Select a battery and cycle from the dataset or enter your own readings. The Random Forest runs entirely in your browser.</p>
+      </div>
+      <div class="predictor-grid">
+        <div class="panel reveal">
+          <div class="mode-tabs">
+            <button class="mode-btn active" data-mode="dataset">Dataset sample</button>
+            <button class="mode-btn" data-mode="manual">Manual inputs</button>
+          </div>
+          <div id="dataset-fields">
+            <div class="field-row">
+              <div class="field"><label for="pred-battery">Battery</label>
+                <select id="pred-battery"><option>B5</option><option>B6</option><option>B7</option></select></div>
+              <div class="field"><label for="pred-cycle">Cycle</label><select id="pred-cycle"></select></div>
+            </div>
+            <button class="btn btn-primary btn-block" id="predict-btn">Run Prediction</button>
+            <p class="pred-context" style="margin-top:14px">Engineered features are computed from the battery history automatically.</p>
+          </div>
+          <div id="manual-fields" class="hidden">
+            <div class="field-row">
+              <div class="field"><label>Charge current chI (A)</label><input type="number" id="m-chI" step="any" value="1.4" /></div>
+              <div class="field"><label>Charge voltage chV (V)</label><input type="number" id="m-chV" step="any" value="4.2" /></div>
+            </div>
+            <div class="field-row">
+              <div class="field"><label>Charge temp chT</label><input type="number" id="m-chT" step="any" value="27" /></div>
+              <div class="field"><label>Discharge current disI (A)</label><input type="number" id="m-disI" step="any" value="1.9" /></div>
+            </div>
+            <div class="field-row">
+              <div class="field"><label>Discharge voltage disV (V)</label><input type="number" id="m-disV" step="any" value="3.3" /></div>
+              <div class="field"><label>Discharge temp disT</label><input type="number" id="m-disT" step="any" value="32" /></div>
+            </div>
+            <div class="field-row">
+              <div class="field"><label>Capacity BCt (Ah)</label><input type="number" id="m-BCt" step="any" value="1.90" /></div>
+              <div class="field"><label>SOH (%)</label><input type="number" id="m-SOH" step="any" value="95" /></div>
+            </div>
+            <div class="field-row">
+              <div class="field"><label>Capacity fade rate</label><input type="number" id="m-fade" step="any" value="0" /></div>
+              <div class="field"><label>SOH rate</label><input type="number" id="m-sohRate" step="any" value="0" /></div>
+            </div>
+            <div class="field-row">
+              <div class="field"><label>Temp rise rate</label><input type="number" id="m-tempRate" step="any" value="0" /></div>
+              <div class="field"><label>Voltage drop</label><input type="number" id="m-vdrop" step="any" value="0.9" /></div>
+            </div>
+            <div class="field-row">
+              <div class="field"><label>BCt rolling mean</label><input type="number" id="m-bctRoll" step="any" value="1.90" /></div>
+              <div class="field"><label>SOH rolling mean</label><input type="number" id="m-sohRoll" step="any" value="95" /></div>
+            </div>
+            <button class="btn btn-primary btn-block" id="predict-btn-manual">Predict RUL</button>
+          </div>
+        </div>
+        <div class="panel reveal">
+          <div class="result-wrap">
+            <h3>Predicted Remaining Useful Life</h3>
+            <div class="gauge" id="gauge">
+              <div class="gauge-inner">
+                <div class="big" id="pred-number">-</div>
+                <div class="unit">cycles</div>
+              </div>
+            </div>
+            <span id="health-badge">Select a sample</span>
+            <div class="pred-context" id="pred-context">Choose a battery and cycle above to predict.</div>
+            <div class="spark-box"><canvas id="spark"></canvas></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section id="explorer">
+    <div class="container">
+      <div class="sec-head reveal">
+        <div class="eyebrow">Interactive Data Explorer</div>
+        <h2>Watch the batteries age</h2>
+        <p>Toggle batteries and metrics to compare SOH, capacity and remaining life across all cycles.</p>
+      </div>
+      <div class="panel reveal">
+        <div class="explorer-toolbar">
+          <div class="bat-toggles">
+            <button class="bat-toggle on" data-bat="B5">B5</button>
+            <button class="bat-toggle on" data-bat="B6">B6</button>
+            <button class="bat-toggle on" data-bat="B7">B7</button>
+          </div>
+          <div class="explorer-select">
+            <select id="explorer-metric">
+              <option value="SOH">State of Health (SOH)</option>
+              <option value="BCt">Capacity (Ah)</option>
+              <option value="RUL">RUL (cycles)</option>
+            </select>
+          </div>
+        </div>
+        <div class="chart-box"><canvas id="explorer-chart"></canvas></div>
+      </div>
+    </div>
+  </section>
+  <section id="model">
+    <div class="container">
+      <div class="sec-head reveal">
+        <div class="eyebrow">Model Performance</div>
+        <h2>Validated with Leave-One-Battery-Out</h2>
+        <p>Trained on two batteries, tested on the third - simulating deployment on an unseen cell.</p>
+      </div>
+      <div class="metric-strip reveal">
+        <div class="metric"><div class="v">0.86</div><div class="k">Avg R-squared</div></div>
+        <div class="metric"><div class="v">22.6</div><div class="k">Avg MAE</div></div>
+        <div class="metric"><div class="v">23.6</div><div class="k">Avg RMSE</div></div>
+      </div>
+      <div class="model-grid">
+        <div class="panel reveal">
+          <h3>Full analysis dashboard</h3>
+          <img class="dash-img" src="assets/battery_rul_analysis.png" alt="Battery RUL analysis dashboard" loading="lazy" />
+          <div class="corr-thumbs">
+            <figure><img class="corr-img" src="assets/correlation/correlation_B5.png" alt="B5 correlation" loading="lazy" /><figcaption>B5</figcaption></figure>
+            <figure><img class="corr-img" src="assets/correlation/correlation_B6.png" alt="B6 correlation" loading="lazy" /><figcaption>B6</figcaption></figure>
+            <figure><img class="corr-img" src="assets/correlation/correlation_B7.png" alt="B7 correlation" loading="lazy" /><figcaption>B7</figcaption></figure>
+          </div>
+        </div>
+        <div class="panel reveal">
+          <h3>Feature importance</h3>
+          <div class="chart-box sm"><canvas id="fi-chart"></canvas></div>
+          <p class="fi-note"><span style="color:#34d399">&#9632;</span> Engineered features &nbsp; <span style="color:#38bdf8">&#9632;</span> Raw sensor readings. Health signals dominate.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section id="thermal">
+    <div class="container">
+      <div class="sec-head reveal">
+        <div class="eyebrow">Thermal-Stress Analysis</div>
+        <h2>From heat generation to SOH degradation</h2>
+        <p>Analytical tangential stress, temperature profiles and cumulative fatigue for each cell.</p>
+      </div>
+      <div class="panel reveal">
+        <div class="tabs">
+          <button class="tab-btn active" data-bat="B5">Battery B5</button>
+          <button class="tab-btn" data-bat="B6">Battery B6</button>
+          <button class="tab-btn" data-bat="B7">Battery B7</button>
+        </div>
+        <div class="gallery-bat" data-bat="B5">
+          <figure><img src="assets/graphs/B5/temperature_profile/temp_profile_cycle_1.png" alt="Temperature profile T(r) at cycle 1" loading="lazy" /><figcaption>Temperature profile T(r) at cycle 1</figcaption></figure>
+          <figure><img src="assets/graphs/B5/heat_gen_vs_cycle/heat_gen_vs_cycle.png" alt="Heat generation vs cycle" loading="lazy" /><figcaption>Heat generation vs cycle</figcaption></figure>
+          <figure><img src="assets/graphs/B5/avg_heat_gen_vs_cycle/avg_heat_gen_vs_cycle.png" alt="Avg heat generation vs cycle" loading="lazy" /><figcaption>Avg heat generation vs cycle</figcaption></figure>
+          <figure><img src="assets/graphs/B5/deltaT_vs_cycle/deltaT_vs_cycle.png" alt="Core-surface dT vs cycle" loading="lazy" /><figcaption>Core-surface dT vs cycle</figcaption></figure>
+          <figure><img src="assets/graphs/B5/stress_vs_cycle/stress_vs_cycle.png" alt="Thermal stress vs cycle" loading="lazy" /><figcaption>Thermal stress vs cycle</figcaption></figure>
+          <figure><img src="assets/graphs/B5/stress_vs_deltaT/stress_vs_deltaT.png" alt="Stress vs deltaT" loading="lazy" /><figcaption>Stress vs deltaT</figcaption></figure>
+          <figure><img src="assets/graphs/B5/stress_vs_r/stress_vs_r_cycle_1.png" alt="Stress profile vs r at cycle 1" loading="lazy" /><figcaption>Stress profile vs r (cycle 1)</figcaption></figure>
+          <figure><img src="assets/graphs/B5/cumulative_stress_vs_cycle/cumulative_stress_and_soh_vs_cycle.png" alt="Cumulative stress and SOH vs cycle" loading="lazy" /><figcaption>Cumulative stress and SOH vs cycle</figcaption></figure>
+          <figure><img src="assets/graphs/B5/cumulative_stress_vs_soh/cumulative_stress_vs_soh.png" alt="SOH vs cumulative stress" loading="lazy" /><figcaption>SOH vs cumulative stress</figcaption></figure>
+        </div>
+        <div class="gallery-bat hidden" data-bat="B6">
+          <figure><img src="assets/graphs/B6/temperature_profile/temp_profile_cycle_1.png" alt="Temperature profile T(r) at cycle 1" loading="lazy" /><figcaption>Temperature profile T(r) at cycle 1</figcaption></figure>
+          <figure><img src="assets/graphs/B6/heat_gen_vs_cycle/heat_gen_vs_cycle.png" alt="Heat generation vs cycle" loading="lazy" /><figcaption>Heat generation vs cycle</figcaption></figure>
+          <figure><img src="assets/graphs/B6/avg_heat_gen_vs_cycle/avg_heat_gen_vs_cycle.png" alt="Avg heat generation vs cycle" loading="lazy" /><figcaption>Avg heat generation vs cycle</figcaption></figure>
+          <figure><img src="assets/graphs/B6/deltaT_vs_cycle/deltaT_vs_cycle.png" alt="Core-surface dT vs cycle" loading="lazy" /><figcaption>Core-surface dT vs cycle</figcaption></figure>
+          <figure><img src="assets/graphs/B6/stress_vs_cycle/stress_vs_cycle.png" alt="Thermal stress vs cycle" loading="lazy" /><figcaption>Thermal stress vs cycle</figcaption></figure>
+          <figure><img src="assets/graphs/B6/stress_vs_deltaT/stress_vs_deltaT.png" alt="Stress vs deltaT" loading="lazy" /><figcaption>Stress vs deltaT</figcaption></figure>
+          <figure><img src="assets/graphs/B6/stress_vs_r/stress_vs_r_cycle_1.png" alt="Stress profile vs r at cycle 1" loading="lazy" /><figcaption>Stress profile vs r (cycle 1)</figcaption></figure>
+          <figure><img src="assets/graphs/B6/cumulative_stress_vs_cycle/cumulative_stress_and_soh_vs_cycle.png" alt="Cumulative stress and SOH vs cycle" loading="lazy" /><figcaption>Cumulative stress and SOH vs cycle</figcaption></figure>
+          <figure><img src="assets/graphs/B6/cumulative_stress_vs_soh/cumulative_stress_vs_soh.png" alt="SOH vs cumulative stress" loading="lazy" /><figcaption>SOH vs cumulative stress</figcaption></figure>
+        </div>
+        <div class="gallery-bat hidden" data-bat="B7">
+          <figure><img src="assets/graphs/B7/temperature_profile/temp_profile_cycle_1.png" alt="Temperature profile T(r) at cycle 1" loading="lazy" /><figcaption>Temperature profile T(r) at cycle 1</figcaption></figure>
+          <figure><img src="assets/graphs/B7/heat_gen_vs_cycle/heat_gen_vs_cycle.png" alt="Heat generation vs cycle" loading="lazy" /><figcaption>Heat generation vs cycle</figcaption></figure>
+          <figure><img src="assets/graphs/B7/avg_heat_gen_vs_cycle/avg_heat_gen_vs_cycle.png" alt="Avg heat generation vs cycle" loading="lazy" /><figcaption>Avg heat generation vs cycle</figcaption></figure>
+          <figure><img src="assets/graphs/B7/deltaT_vs_cycle/deltaT_vs_cycle.png" alt="Core-surface dT vs cycle" loading="lazy" /><figcaption>Core-surface dT vs cycle</figcaption></figure>
+          <figure><img src="assets/graphs/B7/stress_vs_cycle/stress_vs_cycle.png" alt="Thermal stress vs cycle" loading="lazy" /><figcaption>Thermal stress vs cycle</figcaption></figure>
+          <figure><img src="assets/graphs/B7/stress_vs_deltaT/stress_vs_deltaT.png" alt="Stress vs deltaT" loading="lazy" /><figcaption>Stress vs deltaT</figcaption></figure>
+          <figure><img src="assets/graphs/B7/stress_vs_r/stress_vs_r_cycle_1.png" alt="Stress profile vs r at cycle 1" loading="lazy" /><figcaption>Stress profile vs r (cycle 1)</figcaption></figure>
+          <figure><img src="assets/graphs/B7/cumulative_stress_vs_cycle/cumulative_stress_and_soh_vs_cycle.png" alt="Cumulative stress and SOH vs cycle" loading="lazy" /><figcaption>Cumulative stress and SOH vs cycle</figcaption></figure>
+          <figure><img src="assets/graphs/B7/cumulative_stress_vs_soh/cumulative_stress_vs_soh.png" alt="SOH vs cumulative stress" loading="lazy" /><figcaption>SOH vs cumulative stress</figcaption></figure>
+        </div>
+      </div>
+    </div>
+  </section>
+  <div class="lightbox" id="lightbox">
+    <button class="lightbox-close" id="lightbox-close" aria-label="Close">&#10005;</button>
+    <img id="lightbox-img" src="" alt="" />
+    <div class="lightbox-cap" id="lightbox-cap"></div>
+  </div>
+  <section id="deploy" class="reveal">
+    <div class="container" style="text-align:center">
+      <div class="sec-head reveal">
+        <div class="eyebrow">One-click free deployment</div>
+        <h2>Host anywhere, no backend required</h2>
+        <p>This is a fully static site - just drop the web/ folder on any static host and it works instantly.</p>
+      </div>
+      <div class="deploy">
+        <span class="chip">GitHub Pages (free)</span>
+        <span class="chip">Netlify / Vercel (drag-and-drop)</span>
+        <span class="chip">Cloudflare Pages (free)</span>
+        <span class="chip">0 MB backend needed</span>
+      </div>
+    </div>
+  </section>
+  <footer class="footer reveal">
+    <div class="brand"><span class="logo">&#9889;</span><span>Battery RUL Dashboard</span></div>
+    <p>Hybrid physics-informed Random Forest - NASA 18650-cell dataset - Internship Project</p>
+    <p style="margin-top:10px">The model is converted from outputs/battery_rul_rf_model.pkl into JavaScript and verified to reproduce scikit-learn predictions to under 0.001 cycle.</p>
+  </footer>
+  <script src="js/data.js"></script>
+  <script src="js/model.js"></script>
+  <script src="js/featureImportance.js"></script>
+  <script src="js/rf.js"></script>
+  <script src="js/chart.umd.min.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
