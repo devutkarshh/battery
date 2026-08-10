@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Battery RUL Dashboard - Remaining Useful Life Prediction</title>
-  <meta name="description" content="Interactive dashboard predicting lithium-ion battery Remaining Useful Life (RUL) with a physics-informed Random Forest. Runs entirely in your browser, deployable for free." />
+  <title>CellSense - Battery RUL Prediction</title>
+  <meta name="description" content="CellSense - An intelligent machine learning platform that predicts a battery's Remaining Useful Life (RUL) from its historical performance data." />
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="stylesheet" href="css/app.css" />
 </head>
 <body>
   <nav class="navbar" id="navbar">
-    <div class="brand"><span class="logo">&#9889;</span><span>Battery&nbsp;RUL</span></div>
+    <div class="brand"><span class="logo">&#9889;</span><span>CellSense</span></div>
     <button class="nav-toggle" id="nav-toggle" aria-label="Menu">&#9776;</button>
     <div class="nav-links" id="nav-links">
       <a href="#home">Home</a>
@@ -25,8 +25,8 @@
     <canvas id="hero-canvas"></canvas>
     <div class="hero-inner">
       <span class="hero-badge"><span class="dot"></span> Hybrid Physics-Informed ML</span>
-      <h1>Predict Battery <span class="grad">Remaining Useful Life</span> in your browser</h1>
-      <p class="lead">A Random Forest trained on NASA 18650-cell data (B5, B6, B7) predicts Remaining Useful Life purely in JavaScript - no server, no install, deployable anywhere for free.</p>
+      <h1>CellSense</h1>
+      <p class="lead">An intelligent machine learning platform that predicts a battery's Remaining Useful Life (RUL) from its historical performance data, helping identify battery degradation and estimate when it may need replacement.</p>
       <div class="hero-ctas">
         <a href="#predictor" class="btn btn-primary">Try the Predictor</a>
         <a href="#explorer" class="btn btn-ghost">Explore the Data</a>
@@ -106,30 +106,19 @@
               <div class="field"><label>Charge voltage chV (V)</label><input type="number" id="m-chV" step="any" value="4.2" /></div>
             </div>
             <div class="field-row">
-              <div class="field"><label>Charge temp chT</label><input type="number" id="m-chT" step="any" value="27" /></div>
+              <div class="field"><label>Charge temp chT (°C)</label><input type="number" id="m-chT" step="any" value="27" /></div>
               <div class="field"><label>Discharge current disI (A)</label><input type="number" id="m-disI" step="any" value="1.9" /></div>
             </div>
             <div class="field-row">
               <div class="field"><label>Discharge voltage disV (V)</label><input type="number" id="m-disV" step="any" value="3.3" /></div>
-              <div class="field"><label>Discharge temp disT</label><input type="number" id="m-disT" step="any" value="32" /></div>
+              <div class="field"><label>Discharge temp disT (°C)</label><input type="number" id="m-disT" step="any" value="32" /></div>
             </div>
             <div class="field-row">
               <div class="field"><label>Capacity BCt (Ah)</label><input type="number" id="m-BCt" step="any" value="1.90" /></div>
               <div class="field"><label>SOH (%)</label><input type="number" id="m-SOH" step="any" value="95" /></div>
             </div>
-            <div class="field-row">
-              <div class="field"><label>Capacity fade rate</label><input type="number" id="m-fade" step="any" value="0" /></div>
-              <div class="field"><label>SOH rate</label><input type="number" id="m-sohRate" step="any" value="0" /></div>
-            </div>
-            <div class="field-row">
-              <div class="field"><label>Temp rise rate</label><input type="number" id="m-tempRate" step="any" value="0" /></div>
-              <div class="field"><label>Voltage drop</label><input type="number" id="m-vdrop" step="any" value="0.9" /></div>
-            </div>
-            <div class="field-row">
-              <div class="field"><label>BCt rolling mean</label><input type="number" id="m-bctRoll" step="any" value="1.90" /></div>
-              <div class="field"><label>SOH rolling mean</label><input type="number" id="m-sohRoll" step="any" value="95" /></div>
-            </div>
             <button class="btn btn-primary btn-block" id="predict-btn-manual">Predict RUL</button>
+            <p class="pred-context" style="margin-top:10px">Engineered features are computed from the inputs automatically.</p>
           </div>
         </div>
         <div class="panel reveal">
@@ -256,6 +245,7 @@
   </section>
   <div class="lightbox" id="lightbox">
     <button class="lightbox-close" id="lightbox-close" aria-label="Close">&#10005;</button>
+    <a class="lightbox-dl" id="lightbox-dl" href="#" target="_blank" rel="noopener" title="Open / Download image">&#11015; Open original</a>
     <img id="lightbox-img" src="" alt="" />
     <div class="lightbox-cap" id="lightbox-cap"></div>
   </div>
@@ -275,7 +265,7 @@
     </div>
   </section>
   <footer class="footer reveal">
-    <div class="brand"><span class="logo">&#9889;</span><span>Battery RUL Dashboard</span></div>
+    <div class="brand"><span class="logo">&#9889;</span><span>CellSense</span></div>
     <p>Hybrid physics-informed Random Forest - NASA 18650-cell dataset - Internship Project</p>
     <p style="margin-top:10px">The model is converted from outputs/battery_rul_rf_model.pkl into JavaScript and verified to reproduce scikit-learn predictions to under 0.001 cycle.</p>
   </footer>

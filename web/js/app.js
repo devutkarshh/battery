@@ -283,16 +283,27 @@
   function runManualPrediction() {
     var g = function (id) { return parseFloat(document.getElementById(id).value); };
     var chV = g("m-chV"), disV = g("m-disV");
+    var chI = g("m-chI"), disI = g("m-disI");
+    var chT = g("m-chT"), disT = g("m-disT");
+    var BCt = g("m-BCt"), SOH = g("m-SOH");
+
+    /* engineered defaults for single-shot manual entry */
+    var capacity_fade_rate = 0;
+    var SOH_rate = 0;
+    var temp_rise_rate = 0;
+    var voltage_drop = chV - disV;
+    var BCt_rolling_mean = BCt;
+    var SOH_rolling_mean = SOH;
+
     var feats = [
-      g("m-chI"), chV, g("m-chT"),
-      g("m-disI"), disV, g("m-disT"),
-      g("m-BCt"), g("m-SOH"),
-      g("m-fade"), g("m-sohRate"), g("m-tempRate"),
-      chV - disV,
-      g("m-bctRoll"), g("m-sohRoll")
+      chI, chV, chT,
+      disI, disV, disT,
+      BCt, SOH,
+      capacity_fade_rate, SOH_rate, temp_rise_rate,
+      voltage_drop,
+      BCt_rolling_mean, SOH_rolling_mean
     ];
     var pred = window.RUL.predict(feats);
-    $("#m-vdrop").textContent = (chV - disV).toFixed(3) + " V";
     showResult(pred, null, null, null);
   }
 
@@ -366,12 +377,27 @@
       img.addEventListener("click", function () {
         boxImg.src = img.src;
         $("#lightbox-cap").textContent = img.getAttribute("alt") || "";
+        $("#lightbox-dl").href = img.src;
         lightbox.classList.add("open");
       });
     });
     $("#lightbox-close").addEventListener("click", closeLightbox);
     lightbox.addEventListener("click", function (e) { if (e.target === lightbox) closeLightbox(); });
     document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeLightbox(); });
+
+    /* inject per-figure download links */
+    $$(".gallery-bat figure").forEach(function (fig) {
+      var img = fig.querySelector("img");
+      if (!img) return;
+      var a = document.createElement("a");
+      a.className = "fig-dl";
+      a.href = img.src;
+      a.target = "_blank";
+      a.rel = "noopener";
+      a.title = "Open / Download image";
+      a.innerHTML = "&#11015;";
+      fig.appendChild(a);
+    });
   }
   function closeLightbox() { if (lightbox) lightbox.classList.remove("open"); }
 

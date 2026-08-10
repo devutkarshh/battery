@@ -123,30 +123,19 @@ H.append('''
               <div class="field"><label>Charge voltage chV (V)</label><input type="number" id="m-chV" step="any" value="4.2" /></div>
             </div>
             <div class="field-row">
-              <div class="field"><label>Charge temp chT</label><input type="number" id="m-chT" step="any" value="27" /></div>
+              <div class="field"><label>Charge temp chT (°C)</label><input type="number" id="m-chT" step="any" value="27" /></div>
               <div class="field"><label>Discharge current disI (A)</label><input type="number" id="m-disI" step="any" value="1.9" /></div>
             </div>
             <div class="field-row">
               <div class="field"><label>Discharge voltage disV (V)</label><input type="number" id="m-disV" step="any" value="3.3" /></div>
-              <div class="field"><label>Discharge temp disT</label><input type="number" id="m-disT" step="any" value="32" /></div>
+              <div class="field"><label>Discharge temp disT (°C)</label><input type="number" id="m-disT" step="any" value="32" /></div>
             </div>
             <div class="field-row">
               <div class="field"><label>Capacity BCt (Ah)</label><input type="number" id="m-BCt" step="any" value="1.90" /></div>
               <div class="field"><label>SOH (%)</label><input type="number" id="m-SOH" step="any" value="95" /></div>
             </div>
-            <div class="field-row">
-              <div class="field"><label>Capacity fade rate</label><input type="number" id="m-fade" step="any" value="0" /></div>
-              <div class="field"><label>SOH rate</label><input type="number" id="m-sohRate" step="any" value="0" /></div>
-            </div>
-            <div class="field-row">
-              <div class="field"><label>Temp rise rate</label><input type="number" id="m-tempRate" step="any" value="0" /></div>
-              <div class="field"><label>Voltage drop</label><input type="number" id="m-vdrop" step="any" value="0.9" /></div>
-            </div>
-            <div class="field-row">
-              <div class="field"><label>BCt rolling mean</label><input type="number" id="m-bctRoll" step="any" value="1.90" /></div>
-              <div class="field"><label>SOH rolling mean</label><input type="number" id="m-sohRoll" step="any" value="95" /></div>
-            </div>
             <button class="btn btn-primary btn-block" id="predict-btn-manual">Predict RUL</button>
+            <p class="pred-context" style="margin-top:10px">Engineered features are computed from the inputs automatically.</p>
           </div>
         </div>
         <div class="panel reveal">

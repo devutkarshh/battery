@@ -136,6 +136,7 @@ section { padding: 84px 20px; }
   border: 1px solid var(--card-border); color: var(--text); font-size: 0.95rem; outline: none;
   transition: border-color 0.25s, box-shadow 0.25s; }
 .field select:focus, .field input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(56,189,248,0.18); }
+.field select option, .explorer-select select option { background: #0a1122; color: var(--text); }
 .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 .btn-block { width: 100%; justify-content: center; margin-top: 8px; }
 
@@ -177,15 +178,19 @@ section { padding: 84px 20px; }
 .tab-btn { padding: 10px 24px; border-radius: 999px; border: 1px solid var(--card-border); background: rgba(255,255,255,0.04); color: var(--muted); font-weight: 700; cursor: pointer; transition: 0.25s; }
 .tab-btn.active { background: linear-gradient(90deg, var(--accent), var(--accent2)); color: #04121a; border-color: transparent; }
 .gallery-bat { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
-.gallery-bat figure { margin: 0; }
+.gallery-bat figure { margin: 0; position: relative; }
 .gallery-bat img { width: 100%; border-radius: 14px; border: 1px solid var(--card-border); cursor: zoom-in; transition: transform 0.3s, box-shadow 0.3s; }
 .gallery-bat img:hover { transform: scale(1.02); box-shadow: 0 14px 34px rgba(0,0,0,0.45); }
 .gallery-bat figcaption { color: var(--muted); font-size: 0.8rem; margin-top: 8px; text-align: center; }
+.fig-dl { position: absolute; top: 10px; right: 10px; width: 34px; height: 34px; border-radius: 10px; background: rgba(4,6,12,0.75); border: 1px solid var(--card-border); color: var(--text); display: grid; place-items: center; text-decoration: none; font-size: 1.1rem; backdrop-filter: blur(6px); opacity: 0; transition: opacity 0.25s; }
+.gallery-bat figure:hover .fig-dl { opacity: 1; }
 .lightbox { position: fixed; inset: 0; z-index: 200; display: none; align-items: center; justify-content: center; background: rgba(4,6,12,0.92); backdrop-filter: blur(6px); padding: 30px; }
 .lightbox.open { display: flex; }
 .lightbox img { max-width: 92vw; max-height: 84vh; border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,0.6); }
 .lightbox-close { position: absolute; top: 22px; right: 30px; font-size: 2.2rem; color: var(--text); background: none; border: 0; cursor: pointer; }
 .lightbox-cap { color: var(--muted); text-align: center; margin-top: 14px; font-size: 0.9rem; }
+.lightbox-dl { position: absolute; top: 22px; left: 30px; padding: 10px 16px; border-radius: 10px; background: rgba(255,255,255,0.08); border: 1px solid var(--card-border); color: var(--text); font-size: 0.9rem; font-weight: 600; cursor: pointer; text-decoration: none; backdrop-filter: blur(8px); transition: background 0.25s; }
+.lightbox-dl:hover { background: rgba(255,255,255,0.16); }
 
 /* ================= FOOTER ================= */
 .footer { border-top: 1px solid var(--card-border); padding: 46px 20px; text-align: center; color: var(--muted); }
