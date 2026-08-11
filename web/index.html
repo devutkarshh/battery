@@ -32,10 +32,10 @@
         <a href="#explorer" class="btn btn-ghost">Explore the Data</a>
       </div>
       <div class="hero-stats">
-        <div class="stat"><div class="stat-num" data-stat="r2">0</div><div class="stat-label">Avg R-squared</div></div>
-        <div class="stat"><div class="stat-num" data-stat="mae">0</div><div class="stat-label">Avg MAE (cycles)</div></div>
-        <div class="stat"><div class="stat-num" data-stat="rmse">0</div><div class="stat-label">Avg RMSE (cycles)</div></div>
-        <div class="stat"><div class="stat-num" data-stat="batteries">0</div><div class="stat-label">Batteries modelled</div></div>
+        <div class="stat"><div class="stat-num" data-stat="r2">0.86</div><div class="stat-label">Avg R-squared</div></div>
+        <div class="stat"><div class="stat-num" data-stat="mae">22.6</div><div class="stat-label">Avg MAE (cycles)</div></div>
+        <div class="stat"><div class="stat-num" data-stat="rmse">23.6</div><div class="stat-label">Avg RMSE (cycles)</div></div>
+        <div class="stat"><div class="stat-num" data-stat="batteries">3</div><div class="stat-label">Batteries modelled</div></div>
       </div>
     </div>
     <div class="scroll-hint">SCROLL</div>
@@ -133,6 +133,16 @@
             <span id="health-badge">Select a sample</span>
             <div class="pred-context" id="pred-context">Choose a battery and cycle above to predict.</div>
             <div class="spark-box"><canvas id="spark"></canvas></div>
+            <div class="model-cmp" id="model-cmp">
+              <h4>Model comparison (LOBO validation)</h4>
+              <div class="cmp-table-wrap">
+                <table class="cmp-table">
+                  <thead><tr><th>Model</th><th>Avg MAE</th><th>Avg RMSE</th><th>Avg R²</th></tr></thead>
+                  <tbody id="cmp-body"></tbody>
+                </table>
+              </div>
+              <p class="cmp-note">Only Random Forest runs in-browser. Other models are shown for reference from offline validation.</p>
+            </div>
           </div>
         </div>
       </div>
@@ -275,5 +285,6 @@
   <script src="js/rf.js"></script>
   <script src="js/chart.umd.min.js"></script>
   <script src="js/app.js"></script>
+  <script>window.PERF_STATS = { r2: 0.8587, mae: 22.59, rmse: 23.59, batteries: 3 };</script>
 </body>
 </html>

@@ -109,8 +109,10 @@
 
   /* ---------- hero stat counters ---------- */
   function initCounters() {
-    var set = window.PERF_STATS;
-    if (!set) return;
+    // Self-contained defaults so the hero stats always render, even if the
+    // inline <script> window.PERF_STATS in index.html is missing or moved.
+    var DEFAULT_PERF = { r2: 0.8587, mae: 22.59, rmse: 23.59, batteries: 3 };
+    var set = window.PERF_STATS || DEFAULT_PERF;
     var done = false;
     var els = $$(".stat-num");
     var io = new IntersectionObserver(function (entries, obs) {
@@ -120,6 +122,7 @@
           els.forEach(function (el) {
             var key = el.getAttribute("data-stat");
             var target = set[key];
+            if (target == null) target = DEFAULT_PERF[key] || 0;
             var suffix = el.getAttribute("data-suffix") || "";
             var t0 = null, dur = 1200;
             function step(ts) {
@@ -135,7 +138,8 @@
         }
       });
     }, { threshold: 0.4 });
-    io.observe($(".hero-stats"));
+    var hs = $(".hero-stats");
+    if (hs) io.observe(hs);
   }
 
   /* ---------- feature importance chart ---------- */
@@ -336,6 +340,8 @@
       ctxLine.textContent = "Manual prediction from sensor readings";
     }
 
+    renderModelComparison(r);
+
     if (bat && window.Chart && $("#spark")) {
       if (predChart) predChart.destroy();
       var cols = DATA[bat];
@@ -359,6 +365,29 @@
         }
       });
     }
+  }
+
+  function renderModelComparison(rfPrediction) {
+    var body = $("#cmp-body");
+    if (!body) return;
+    var rows = [
+      { name: "Linear Regression", mae: 23.20, rmse: 23.67, r2: 0.8571 },
+      { name: "Ridge Regression",  mae: 23.16, rmse: 23.66, r2: 0.8573 },
+      { name: "Random Forest",     mae: 22.59, rmse: 23.59, r2: 0.8587, live: true },
+      { name: "Gradient Boosting", mae: 22.98, rmse: 24.38, r2: 0.8524 }
+    ];
+    var html = "";
+    rows.forEach(function (m) {
+      var nameCls = m.live ? "live" : "";
+      var maeCls = m.live ? "live" : "";
+      html += "<tr class=\"" + nameCls + "\">" +
+        "<td>" + m.name + (m.live ? " <span style='font-size:0.7rem;color:#34d399'>(live)</span>" : "") + "</td>" +
+        "<td class=\"" + maeCls + "\">" + m.mae.toFixed(2) + "</td>" +
+        "<td>" + m.rmse.toFixed(2) + "</td>" +
+        "<td>" + m.r2.toFixed(4) + "</td>" +
+        "</tr>";
+    });
+    body.innerHTML = html;
   }
 
   /* ---------- thermal gallery ---------- */

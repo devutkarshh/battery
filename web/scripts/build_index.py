@@ -150,6 +150,16 @@ H.append('''
             <span id="health-badge">Select a sample</span>
             <div class="pred-context" id="pred-context">Choose a battery and cycle above to predict.</div>
             <div class="spark-box"><canvas id="spark"></canvas></div>
+            <div class="model-cmp" id="model-cmp">
+              <h4>Model comparison (LOBO validation)</h4>
+              <div class="cmp-table-wrap">
+                <table class="cmp-table">
+                  <thead><tr><th>Model</th><th>Avg MAE</th><th>Avg RMSE</th><th>Avg R²</th></tr></thead>
+                  <tbody id="cmp-body"></tbody>
+                </table>
+              </div>
+              <p class="cmp-note">Only Random Forest runs in-browser. Other models are shown for reference from offline validation.</p>
+            </div>
           </div>
         </div>
       </div>

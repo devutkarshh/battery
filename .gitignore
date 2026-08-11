@@ -13,6 +13,7 @@ venv/
 .idea/
 *.swp
 *.swo
+.rmv/
 
 # OS
 .DS_Store
@@ -25,3 +26,6 @@ desktop.ini
 
 # Large binaries (optional)
 *.pkl
+
+# Local scratch
+model_output.txt
